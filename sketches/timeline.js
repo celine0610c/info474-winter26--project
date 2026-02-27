@@ -102,7 +102,7 @@ const timelineSketch = (p) => {
       }
 
       // Sanity check
-      if (!year || isNaN(year) || year < 1970 || year > currentYear) continue;
+      if (!year || isNaN(year) || year < 2000 || year > 2025) continue;
 
       raw[year] = (raw[year] || 0) + 1;
     }
