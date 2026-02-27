@@ -2,19 +2,823 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>Seattle Curb Ramps</title>
-  <link rel="stylesheet" href="css/style.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Broken Curbs — Seattle's Accessibility Crisis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ── Reset & base ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #1a1814;
+      --ink-light:  #4a4540;
+      --ink-faint:  #9a948e;
+      --paper:      #faf8f4;
+      --paper-warm: #f2ede4;
+      --rule:       #ddd8d0;
+      --accent:     #c0392b;
+      --accent-dim: #e8c4c0;
+      --good:       #2e7d52;
+      --fair:       #b07d2a;
+      --poor:       #c0392b;
+      --new:        #1a5fa8;
+
+      --col-width: 680px;
+      --wide-width: 960px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Top rule ───────────────────────────────────────────── */
+    .top-rule {
+      height: 4px;
+      background: var(--ink);
+    }
+
+    /* ── Masthead ───────────────────────────────────────────── */
+    .masthead {
+      border-bottom: 1px solid var(--rule);
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .masthead-publication {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    .masthead-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .masthead-date {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--ink-faint);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Hero ───────────────────────────────────────────────── */
+    .hero {
+      max-width: var(--wide-width);
+      margin: 0 auto;
+      padding: 80px 40px 60px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .hero-kicker {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hero-kicker::after {
+      content: '';
+      display: block;
+      height: 1px;
+      width: 40px;
+      background: var(--accent);
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      max-width: 800px;
+      margin-bottom: 28px;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-deck {
+      font-size: 1.2rem;
+      line-height: 1.55;
+      color: var(--ink-light);
+      max-width: 600px;
+      font-weight: 300;
+      margin-bottom: 36px;
+    }
+
+    .hero-byline {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      color: var(--ink-faint);
+      border-top: 1px solid var(--rule);
+      padding-top: 16px;
+      display: flex;
+      gap: 30px;
+    }
+
+    .hero-byline span { color: var(--ink-light); }
+
+    /* ── Stat strip ─────────────────────────────────────────── */
+    .stat-strip {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 40px;
+    }
+
+    .stat-strip-inner {
+      max-width: var(--wide-width);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 40px;
+    }
+
+    .stat-item {}
+
+    .stat-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      font-weight: 900;
+      line-height: 1;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .stat-number.red   { color: #e07070; }
+    .stat-number.amber { color: #d4a853; }
+    .stat-number.green { color: #6dbf8a; }
+
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #888;
+      line-height: 1.4;
+    }
+
+    /* ── Article body ───────────────────────────────────────── */
+    .article-body {
+      max-width: var(--col-width);
+      margin: 0 auto;
+      padding: 60px 40px;
+    }
+
+    .article-body p {
+      margin-bottom: 1.4em;
+      font-weight: 300;
+    }
+
+    .article-body p strong {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .drop-cap::first-letter {
+      font-family: 'Playfair Display', serif;
+      font-size: 4.2em;
+      font-weight: 900;
+      float: left;
+      line-height: 0.8;
+      margin: 0.05em 0.08em 0 0;
+      color: var(--ink);
+    }
+
+    /* ── Pull quote ─────────────────────────────────────────── */
+    .pull-quote {
+      max-width: var(--wide-width);
+      margin: 0 auto 0;
+      padding: 50px 40px;
+      border-top: 3px solid var(--ink);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .pull-quote blockquote {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.35;
+      color: var(--ink);
+      max-width: 740px;
+    }
+
+    .pull-quote blockquote strong {
+      font-style: normal;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    /* ── Section headers ────────────────────────────────────── */
+    .section-header {
+      max-width: var(--wide-width);
+      margin: 0 auto;
+      padding: 60px 40px 20px;
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .section-number {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--ink-faint);
+      flex-shrink: 0;
+    }
+
+    .section-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Viz containers ─────────────────────────────────────── */
+    .viz-wrap {
+      max-width: var(--wide-width);
+      margin: 0 auto;
+      padding: 20px 40px 50px;
+    }
+
+    .viz-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .viz-label::before {
+      content: '▶';
+      font-size: 0.5rem;
+      color: var(--accent);
+    }
+
+    .viz-caption {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.85rem;
+      color: var(--ink-faint);
+      margin-top: 14px;
+      font-style: italic;
+      border-left: 2px solid var(--rule);
+      padding-left: 14px;
+      line-height: 1.5;
+    }
+
+    /* canvas containers — p5 sketches mount here */
+    #bar-chart-container,
+    #timeline-container,
+    #choropleth-container,
+    #drilldown-container,
+    #search-filter-container,
+    #filterable-bar-container {
+      background: #fff;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      min-height: 420px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* placeholder style before sketch loads */
+    .viz-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 420px;
+      gap: 12px;
+      color: var(--rule);
+    }
+
+    .viz-placeholder-icon {
+      font-size: 2rem;
+      opacity: 0.4;
+    }
+
+    .viz-placeholder-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.4;
+    }
+
+    /* ── Tooltip (shared) ───────────────────────────────────── */
+    .viz-tooltip {
+      position: fixed;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      padding: 10px 16px;
+      border-radius: 2px;
+      pointer-events: none;
+      display: none;
+      z-index: 999;
+      line-height: 1.7;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+
+    .viz-tooltip strong {
+      display: block;
+      font-size: 0.78rem;
+      margin-bottom: 2px;
+      color: #fff;
+    }
+
+    /* ── Methodology / footer ───────────────────────────────── */
+    .methodology {
+      background: var(--paper-warm);
+      border-top: 1px solid var(--rule);
+      padding: 50px 40px;
+    }
+
+    .methodology-inner {
+      max-width: var(--col-width);
+      margin: 0 auto;
+    }
+
+    .methodology h3 {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 16px;
+    }
+
+    .methodology p {
+      font-size: 0.9rem;
+      color: var(--ink-light);
+      line-height: 1.7;
+      margin-bottom: 0.8em;
+    }
+
+    .methodology a {
+      color: var(--ink);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .site-footer {
+      background: var(--ink);
+      color: #666;
+      padding: 30px 40px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      text-align: center;
+    }
+
+    .site-footer a { color: #888; }
+
+    /* ── Color legend ───────────────────────────────────────── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin: 16px 0 0;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      color: var(--ink-light);
+    }
+
+    .legend-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .masthead { padding: 16px 20px; }
+      .hero, .article-body, .viz-wrap,
+      .section-header, .pull-quote,
+      .methodology { padding-left: 20px; padding-right: 20px; }
+      .stat-strip { padding: 30px 20px; }
+      .hero h1 { font-size: 2.4rem; }
+    }
+
+    /* ── Scroll fade-in ─────────────────────────────────────── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Bar chart lives here -->
-  <div id="bar-chart-container"></div>
-  <div id="bar-chart-tooltip" style="position:fixed; display:none; background:#1a1a1a; border:1px solid #333; color:#e8e2d5; font-family:monospace; font-size:0.72rem; padding:8px 14px; border-radius:3px; pointer-events:none; z-index:999;"></div>
+  <div class="top-rule"></div>
 
-  <!-- Load scripts in this exact order -->
+  <!-- Masthead -->
+  <header class="masthead">
+    <span class="masthead-publication">INFO 474 · Data Visualization</span>
+    <a class="masthead-title" href="#">Broken Curbs</a>
+    <span class="masthead-date">Seattle, WA · 2025</span>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero fade-in">
+    <div class="hero-kicker">Accessibility · Infrastructure · Equity</div>
+    <h1>Seattle's Streets Are <em>Failing</em> the People Who Need Them Most</h1>
+    <p class="hero-deck">
+      An analysis of 46,000+ curb ramps reveals a city unevenly maintained —
+      where your zip code determines whether the sidewalk ends in a ramp or a curb.
+    </p>
+    <div class="hero-byline">
+      By <span>INFO 474 Group 3</span>
+      &nbsp;·&nbsp;
+      Data: <span>Seattle Open Data Portal</span>
+      &nbsp;·&nbsp;
+      <span>46,126 ramp records analyzed</span>
+    </div>
+  </section>
+
+  <!-- Stat strip -->
+  <div class="stat-strip">
+    <div class="stat-strip-inner">
+      <div class="stat-item">
+        <div class="stat-number" id="stat-total">46,126</div>
+        <div class="stat-label">Total curb ramps<br>in Seattle</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number red" id="stat-poor">—</div>
+        <div class="stat-label">Rated poor or<br>very poor condition</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number amber" id="stat-fair">—</div>
+        <div class="stat-label">Rated fair<br>condition</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number green" id="stat-good">—</div>
+        <div class="stat-label">Rated good<br>condition</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Intro body copy -->
+  <div class="article-body">
+    <p class="drop-cap">
+      For the 15% of Seattle residents living with a disability, a crumbling curb ramp
+      is not an inconvenience — it is a barrier. When a curb ramp is rated "poor" or
+      "very poor," it can render entire blocks impassable for wheelchair users, people
+      with visual impairments, and parents pushing strollers.
+    </p>
+    <p>
+      The City of Seattle's Department of Transportation maintains a dataset of every
+      curb ramp in the city, tracking their condition, installation date, and location.
+      What that data reveals is a patchwork of maintenance — some neighborhoods dense
+      with newly installed, compliant ramps, others still relying on infrastructure
+      installed decades ago and long past its useful life.
+    </p>
+    <p>
+      <strong>This investigation examines that data across six dimensions</strong> —
+      from the overall breakdown of ramp conditions, to how conditions have shifted over
+      time, to which city districts bear the greatest burden of deteriorating infrastructure.
+    </p>
+  </div>
+
+  <!-- Pull quote -->
+  <div class="pull-quote fade-in">
+    <blockquote>
+      "A curb ramp rated <strong>'very poor'</strong> isn't just a maintenance note —
+      it's a neighborhood telling its residents they don't belong on the street."
+    </blockquote>
+  </div>
+
+  <!-- ── VIZ 1: Bar chart ───────────────────────────────────── -->
+  <div class="section-header fade-in">
+    <span class="section-number">01 /</span>
+    <h2>The Condition Breakdown</h2>
+  </div>
+
+  <div class="viz-wrap fade-in">
+    <div class="viz-label">Static visualization — Ramp counts by condition rating</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#4caf7d"></div>Good</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#c8a96e"></div>Fair</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#d97c4f"></div>Poor</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#c0392b"></div>Very Poor</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#5b8dd9"></div>New Construction</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#888"></div>Unknown</div>
+    </div>
+    <br/>
+    <div id="bar-chart-container">
+      <div class="viz-placeholder">
+        <div class="viz-placeholder-icon">▬▬▬</div>
+        <div class="viz-placeholder-text">Loading visualization…</div>
+      </div>
+    </div>
+    <p class="viz-caption">
+      Distribution of all 46,126 curb ramps in Seattle by their most recent condition rating.
+      Hover over a bar to see exact counts and percentages.
+    </p>
+  </div>
+
+  <div class="article-body">
+    <p>
+      The numbers tell a stark story. While a significant share of ramps are rated "good,"
+      the combined total of ramps in fair, poor, and very poor condition represents a
+      substantial maintenance backlog — infrastructure that wheelchair users must navigate
+      every day.
+    </p>
+    <p>
+      What the aggregate numbers obscure, however, is where those failing ramps are located.
+      As the sections below show, deterioration is not evenly distributed across the city.
+    </p>
+  </div>
+
+  <!-- ── VIZ 2: Timeline ───────────────────────────────────── -->
+  <div class="section-header fade-in">
+    <span class="section-number">02 /</span>
+    <h2>Decades of Installation — A City Built in Waves</h2>
+  </div>
+
+  <div class="viz-wrap fade-in">
+    <div class="viz-label">Static visualization — Ramp installations per year</div>
+    <div id="timeline-container">
+      <div class="viz-placeholder">
+        <div class="viz-placeholder-icon">〜〜〜</div>
+        <div class="viz-placeholder-text">Timeline sketch coming soon</div>
+      </div>
+    </div>
+    <p class="viz-caption">
+      Number of curb ramps installed each year, revealing how ADA legislation,
+      city budget cycles, and infrastructure projects have shaped Seattle's ramp network over time.
+    </p>
+  </div>
+
+  <div class="article-body">
+    <p>
+      The timeline of installations is not a steady upward curve — it is punctuated by
+      spikes that correspond to federal ADA mandates, city-wide infrastructure bonds, and
+      neighborhood improvement projects. Ramps installed in the 1980s and 90s are now
+      aging into "poor" and "very poor" ratings at an accelerating rate.
+    </p>
+  </div>
+
+  <!-- ── VIZ 3: Choropleth ─────────────────────────────────── -->
+  <div class="section-header fade-in">
+    <span class="section-number">03 /</span>
+    <h2>A Geography of Neglect</h2>
+  </div>
+
+  <div class="viz-wrap fade-in">
+    <div class="viz-label">Static visualization — Ramp condition by neighborhood</div>
+    <div id="choropleth-container">
+      <div class="viz-placeholder">
+        <div class="viz-placeholder-icon">▦</div>
+        <div class="viz-placeholder-text">Choropleth sketch coming soon</div>
+      </div>
+    </div>
+    <p class="viz-caption">
+      Average ramp condition score by Seattle neighborhood. Darker areas indicate
+      a higher concentration of poor or very poor rated ramps.
+    </p>
+  </div>
+
+  <div class="article-body">
+    <p>
+      When condition data is mapped to neighborhoods, a clear pattern emerges.
+      <strong>Districts in south Seattle consistently show higher concentrations of
+      deteriorating ramps</strong> than those in wealthier northern neighborhoods —
+      a disparity that mirrors broader patterns of infrastructure disinvestment
+      in lower-income communities of color.
+    </p>
+  </div>
+
+  <!-- Pull quote 2 -->
+  <div class="pull-quote fade-in">
+    <blockquote>
+      The geography of neglect mirrors the geography of wealth —
+      <strong>the neighborhoods least able to advocate for repairs
+      are the ones that need them most.</strong>
+    </blockquote>
+  </div>
+
+  <!-- ── VIZ 4: Drill-down ─────────────────────────────────── -->
+  <div class="section-header fade-in">
+    <span class="section-number">04 /</span>
+    <h2>Click to Explore: Condition by District</h2>
+  </div>
+
+  <div class="viz-wrap fade-in">
+    <div class="viz-label">Interactive — Click a condition to see district breakdown</div>
+    <div id="drilldown-container">
+      <div class="viz-placeholder">
+        <div class="viz-placeholder-icon">◉</div>
+        <div class="viz-placeholder-text">Drill-down sketch coming soon</div>
+      </div>
+    </div>
+    <p class="viz-caption">
+      Click any condition bar to drill down and see how that condition is distributed
+      across Seattle's city council districts. Click again to return to the overview.
+    </p>
+  </div>
+
+  <!-- ── VIZ 5: Filterable bar ─────────────────────────────── -->
+  <div class="section-header fade-in">
+    <span class="section-number">05 /</span>
+    <h2>How Condition Has Changed Over Time</h2>
+  </div>
+
+  <div class="viz-wrap fade-in">
+    <div class="viz-label">Interactive — Drag the slider to filter by installation year</div>
+    <div id="filterable-bar-container">
+      <div class="viz-placeholder">
+        <div class="viz-placeholder-icon">⊡</div>
+        <div class="viz-placeholder-text">Filterable bar sketch coming soon</div>
+      </div>
+    </div>
+    <p class="viz-caption">
+      Use the year slider to filter ramps by installation date. Watch how the
+      condition distribution shifts as you isolate older vs. newer infrastructure.
+    </p>
+  </div>
+
+  <div class="article-body">
+    <p>
+      Filtering by installation decade makes the aging problem undeniable. Ramps
+      installed before 1995 show a dramatically higher proportion of poor and very
+      poor ratings than those installed in the last decade. Seattle's oldest ramps —
+      many installed just to meet the minimum requirements of the 1990 ADA — are
+      now failing at scale.
+    </p>
+  </div>
+
+  <!-- ── VIZ 6: Search / filter ────────────────────────────── -->
+  <div class="section-header fade-in">
+    <span class="section-number">06 /</span>
+    <h2>Find Ramps Near You</h2>
+  </div>
+
+  <div class="viz-wrap fade-in">
+    <div class="viz-label">Interactive — Filter by condition, year, and district</div>
+    <div id="search-filter-container">
+      <div class="viz-placeholder">
+        <div class="viz-placeholder-icon">⌕</div>
+        <div class="viz-placeholder-text">Search & filter sketch coming soon</div>
+      </div>
+    </div>
+    <p class="viz-caption">
+      Use the filters to explore the dataset directly — search by condition rating,
+      installation year range, or city district to find specific ramps in the city.
+    </p>
+  </div>
+
+  <!-- Conclusion -->
+  <div class="article-body">
+    <p>
+      The data presents Seattle's leadership with a clear challenge: tens of thousands
+      of curb ramps exist across the city, but a significant portion are rated in
+      conditions that compromise their usability for people with disabilities. And the
+      distribution of that deterioration is not random — it follows the fault lines of
+      neighborhood wealth and political power.
+    </p>
+    <p>
+      <strong>What happens next depends on priorities.</strong> The data exists.
+      The locations are known. The question is whether the city will act before
+      another generation of residents is left stranded at the curb.
+    </p>
+  </div>
+
+  <!-- Methodology -->
+  <div class="methodology">
+    <div class="methodology-inner">
+      <h3>Methodology & Data Notes</h3>
+      <p>
+        All data sourced from the
+        <a href="https://data.seattle.gov/dataset/Curb-Ramps/wraq-yxwb" target="_blank">
+          Seattle Open Data Portal's Curb Ramps dataset</a>,
+        maintained by the Seattle Department of Transportation (SDOT).
+        The dataset contains 46,126 records as of the time of analysis.
+      </p>
+      <p>
+        Condition ratings (Good, Fair, Poor, Very Poor) are assigned by SDOT field
+        inspectors. Records with blank condition fields have been categorized as "Unknown"
+        for visualization purposes. Installation dates were parsed from the
+        <code>INSTALL_DATE</code> field; records with missing or malformed dates were
+        excluded from timeline analysis.
+      </p>
+      <p>
+        District assignments use the <code>PRIMARYDISTRICTCD</code> field.
+        This project was built with p5.js for the INFO 474 Data Visualization course
+        at the University of Washington.
+      </p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    INFO 474 · Data Visualization · University of Washington · 2025
+    &nbsp;·&nbsp;
+    <a href="https://data.seattle.gov/dataset/Curb-Ramps/wraq-yxwb" target="_blank">Data Source</a>
+  </footer>
+
+  <!-- Shared tooltip -->
+  <div id="bar-chart-tooltip" class="viz-tooltip"></div>
+  <div id="timeline-tooltip" class="viz-tooltip"></div>
+  <div id="drilldown-tooltip" class="viz-tooltip"></div>
+  <div id="filterable-bar-tooltip" class="viz-tooltip"></div>
+  <div id="search-filter-tooltip" class="viz-tooltip"></div>
+
+  <!-- Scripts — ORDER MATTERS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
   <script src="shared/dataLoader.js"></script>
   <script src="sketches/bar-chart.js"></script>
+  <!-- Uncomment as teammates finish their sketches: -->
+  <!-- <script src="sketches/timeline.js"></script> -->
+  <!-- <script src="sketches/choropleth.js"></script> -->
+  <!-- <script src="sketches/drilldown.js"></script> -->
+  <!-- <script src="sketches/filterable-bar.js"></script> -->
+  <!-- <script src="sketches/search-filter.js"></script> -->
+
+  <script>
+    // ── Scroll fade-in observer ──────────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // ── Live stats from dataLoader ───────────────────────────
+    // Populates the stat strip once data is loaded
+    async function populateStats() {
+      try {
+        const rows = await loadRampData();
+        const counts = {};
+        for (const row of rows) {
+          const c = (row['CONDITION'] || 'Unknown').trim().toLowerCase();
+          counts[c] = (counts[c] || 0) + 1;
+        }
+        const poor    = (counts['poor']      || 0) + (counts['very poor'] || 0);
+        const fair    = counts['fair']        || 0;
+        const good    = counts['good']        || 0;
+        const fmt     = n => n.toLocaleString();
+
+        document.getElementById('stat-total').textContent = fmt(rows.length);
+        document.getElementById('stat-poor').textContent  = fmt(poor);
+        document.getElementById('stat-fair').textContent  = fmt(fair);
+        document.getElementById('stat-good').textContent  = fmt(good);
+      } catch(e) {
+        console.warn('Could not populate stats:', e);
+      }
+    }
+    populateStats();
+  </script>
 
 </body>
 </html>
