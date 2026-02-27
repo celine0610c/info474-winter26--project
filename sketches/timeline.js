@@ -1,17 +1,3 @@
-// ============================================================
-//  timeline.js
-//  Static line chart — curb ramp installations per year
-//
-//  Gestalt principles applied:
-//  - Continuity:    smooth bezier line guides eye left → right
-//  - Proximity:     x labels every 5 years to avoid crowding
-//  - Figure/Ground: gradient fill creates clear foreground shape
-//  - Similarity:    consistent dot size at every data point
-//  - Prägnanz:      single peak annotation as the key anchor
-//
-//  DEPENDS ON: shared/dataLoader.js
-// ============================================================
-
 const TIMELINE_THEME = {
   bg:        '#ffffff',
   gridLine:  '#f0f0f5',
@@ -102,14 +88,14 @@ const timelineSketch = (p) => {
       }
 
       // Sanity check
-      if (!year || isNaN(year) || year < 2000 || year > 2025) continue;
+      if (!year || isNaN(year) || year < 1970 || year > new Date().getFullYear()) continue;
 
       raw[year] = (raw[year] || 0) + 1;
     }
 
     years      = Object.keys(raw).map(Number).sort((a, b) => a - b);
     yearCounts = raw;
-    total      = rows.length;
+    total      = years.reduce((sum, y) => sum + raw[y], 0);
     maxCount   = Math.max(...years.map(y => raw[y]));
     peakYear   = years.reduce((a, b) => raw[a] > raw[b] ? a : b, years[0]);
 

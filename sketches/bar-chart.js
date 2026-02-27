@@ -1,23 +1,3 @@
-// ============================================================
-//  bar-chart.js
-//  Static bar chart — Seattle curb ramp counts by condition
-//
-//  Gestalt principles applied:
-//  - Proximity:    only bars with meaningful counts are shown;
-//                  consistent spacing creates clear groups
-//  - Similarity:   all bars share equal width; color encodes
-//                  condition severity on a consistent scale
-//  - Figure/Ground: white bg, light grid recedes; bars + labels
-//                  are the clear foreground
-//  - Continuity:   grid lines guide the eye horizontally to the
-//                  y-axis; bar tops align to a clear baseline
-//  - Common Region: subtle inner padding frames the chart area
-//  - Prägnanz:     labels sized by hierarchy — title > value
-//                  labels > axis ticks; nothing competes equally
-//
-//  DEPENDS ON: shared/dataLoader.js
-// ============================================================
-
 const CONDITION_FIELD = 'CONDITION';
 
 // Threshold — bars below this count are filtered out as noise
