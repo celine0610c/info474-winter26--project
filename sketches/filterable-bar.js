@@ -36,7 +36,7 @@ const heatmapSketch = (p) => {
   p.setup = function () {
     W = p.min(p.windowWidth - 100, 920);
     H = 380;
-    p.createCanvas(W, H).parent('heatmap-container');
+    p.createCanvas(W, H).parent('filterable-bar-container');
     p.textFont(HEATMAP_THEME.font);
     loadData();
   };
@@ -228,7 +228,7 @@ const heatmapSketch = (p) => {
   }
 
   function updateTooltip() {
-    const tooltip = document.getElementById('heatmap-tooltip');
+    const tooltip = document.getElementById('filterable-bar-tooltip');
     if (!tooltip) return;
 
     const ci = Math.floor((p.mouseX - HPAD.left) / CELL_W);
