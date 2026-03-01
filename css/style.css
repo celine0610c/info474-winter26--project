@@ -339,6 +339,58 @@ body {
   color: var(--text-tertiary);
   line-height: 1.5;
 }
+/* ── VIZ 6 Controls (Search & Filter) ─────────────────────── */
+.search-filter-block {
+  padding: 16px;
+}
+
+.search-filter-controls{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.sf-label{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.sf-select, .sf-input{
+  height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+  min-width: 160px;
+  outline: none;
+}
+
+.sf-select:focus, .sf-input:focus{
+  border-color: rgba(0,113,227,0.45);
+  box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
+}
+
+.sf-count{
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  padding-bottom: 6px;
+}
+
+/* Make the p5 canvas feel like other cards */
+#search-filter-viz canvas{
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
 
 /* ── Legend ───────────────────────────────────────────────── */
 .legend {
