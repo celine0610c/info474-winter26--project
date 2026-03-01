@@ -185,7 +185,7 @@ const searchFilterSketch = (p) => {
 
       if (i % 2 === 0) {
         p.noStroke();
-        p.fill(248);
+        p.fill(232, 241, 251););
         p.rect(x0 - 6, y - 12, W - PAD.left - PAD.right + 12, lineH, 6);
       }
 
