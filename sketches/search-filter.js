@@ -163,7 +163,7 @@ const searchFilterSketch = (p) => {
     p.textStyle(p.NORMAL);
 
     y += 16;
-    p.stroke(235);
+    p.stroke(230, 238, 250); // light blue line
     p.line(x0, y, W - PAD.right, y);
     y += 14;
 
@@ -185,7 +185,7 @@ const searchFilterSketch = (p) => {
 
       if (i % 2 === 0) {
         p.noStroke();
-        p.fill(232, 241, 251););
+        p.fill(232, 241, 251); // #e8f1fb light blue zebra row
         p.rect(x0 - 6, y - 12, W - PAD.left - PAD.right + 12, lineH, 6);
       }
 
