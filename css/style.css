@@ -391,6 +391,34 @@ body {
   border-radius: var(--radius);
   border: 1px solid var(--border);
 }
+/* ── VIZ 6 Blue theme overrides (match site accent) ───────── */
+.search-filter-block{
+  border-color: rgba(0,113,227,0.18);
+}
+
+.sf-select, .sf-input{
+  border-color: rgba(0,113,227,0.20);
+  background: #fff;
+}
+
+.sf-select:focus, .sf-input:focus{
+  border-color: rgba(0,113,227,0.55);
+  box-shadow: 0 0 0 3px rgba(0,113,227,0.18);
+}
+
+.sf-count{
+  color: rgba(0,113,227,0.70);
+}
+
+/* Canvas container border + inner lines look bluer */
+#search-filter-viz canvas{
+  border-color: rgba(0,113,227,0.18);
+}
+
+/* Optional: make dropdown arrow + selection feel more "accent" */
+.sf-select{
+  accent-color: var(--accent);
+}
 
 /* ── Legend ───────────────────────────────────────────────── */
 .legend {
