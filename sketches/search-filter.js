@@ -143,20 +143,11 @@ const searchFilterSketch = (p) => {
     ui.countEl.textContent = `${filtered.length.toLocaleString()} ramps matched`;
   }
 
-  function drawHeader() {
-    p.noStroke();
-    p.fill(20);
-    p.textSize(14);
-    p.text("Explore the Data — Filter curb ramps by condition, district, and year", 12, 20);
-
-    p.fill(120);
-    p.textSize(12);
-    p.text("Showing first 30 results (for performance).", 12, 38);
-  }
+  function drawHeader() {}
 
   function drawResults() {
     const x0 = PAD.left;
-    let y = 70;
+    let y = 34;
     const lineH = 18;
     const maxRows = 30;
 
@@ -236,12 +227,16 @@ const searchFilterSketch = (p) => {
   }
 
   function normCond(v) {
-    const s = (v || "").toString().trim();
+    const s = (v || "").toString().trim().toLowerCase();
     if (!s) return "Unknown";
-    const low = s.toLowerCase();
-    if (low === "very poor") return "Very Poor";
-    if (low === "new construction") return "New Construction";
-    return low.charAt(0).toUpperCase() + low.slice(1);
+
+    if (s.includes("new")) return "New Construction";
+    if (s === "very poor") return "Very Poor";
+    if (s === "poor") return "Poor";
+    if (s === "fair") return "Fair";
+    if (s === "good" || s === "excellent") return "Good";
+
+    return "Unknown";
   }
 
   function extractYear(dateStr) {
