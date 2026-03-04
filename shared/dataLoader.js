@@ -16,8 +16,7 @@
 const CSV_PATH = 'data/Curb_Ramps_CDL_-812241815784101376.csv';
 
 // Seattle neighborhood GeoJSON — City of Seattle open data
-const NEIGHBORHOODS_GEOJSON_URL =
-  'https://data-seattlecitygis.opendata.arcgis.com/api/download/v1/items/b4a142f592e94d39a3bf787f3c112c1d/geojson?layers=0';
+const NEIGHBORHOODS_GEOJSON_URL = 'data/seattle-neighborhoods.geojson';
 
 let _cache = null;
 
@@ -156,8 +155,8 @@ function findNeighborhood(lon, lat, features) {
     const geom = feature.geometry;
     if (!geom) continue;
 
-    const name = feature.properties.L_HOOD ||
-                 feature.properties.S_HOOD ||
+    const name = feature.properties.S_HOOD ||
+                 feature.properties.L_HOOD ||
                  feature.properties.NEIGHBORHO ||
                  feature.properties.NAME ||
                  feature.properties.name ||

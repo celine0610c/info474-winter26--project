@@ -1,195 +1,140 @@
 // ============================================================
-//  choropleth.js
-//  Static choropleth map — ramp accessibility by neighborhood
-//
-//  Metric: % of ramps rated Good in each neighborhood
-//    Green  = high % good  (accessible)
-//    Red    = low % good   (needs attention)
-//
-//  Uses Leaflet.js for the map, loaded via CDN in index.html.
-//  Neighborhood polygons come from the same GeoJSON already
-//  fetched by dataLoader.js.
-//
-//  DEPENDS ON: shared/dataLoader.js
+//  point-map.js  —  Neighborhood accessibility choropleth
+//  DEPENDS ON: shared/dataLoader.js, Leaflet CSS + JS
 // ============================================================
 
-const CHOROPLETH_GEOJSON_URL =
-  'https://data-seattlecitygis.opendata.arcgis.com/api/download/v1/items/b4a142f592e94d39a3bf787f3c112c1d/geojson?layers=0';
+const CHOROPLETH_URL = 'data/seattle-neighborhoods.geojson';
 
-// Color scale: red → amber → green based on % good
 function accessibilityColor(pct) {
-  if (pct === null) return '#e0e0e5';   // no data — light gray
-  if (pct >= 80)   return '#34c759';    // great
-  if (pct >= 60)   return '#7dce8f';    // good
-  if (pct >= 40)   return '#ffd60a';    // moderate
-  if (pct >= 20)   return '#ff9f0a';    // poor
-  return '#ff3b30';                      // very poor
+  if (pct === null || pct === undefined) return '#e0e0e5';
+  if (pct >= 80) return '#34c759';
+  if (pct >= 60) return '#7dce8f';
+  if (pct >= 40) return '#ffd60a';
+  if (pct >= 20) return '#ff9f0a';
+  return '#ff3b30';
 }
 
-(async function () {
-  const container = document.getElementById('choropleth-container');
-  if (!container) return;
+function getHoodName(props) {
+  return props.S_HOOD || props.L_HOOD || props.NEIGHBORHO || props.NAME || props.name || null;
+}
 
-  container.innerHTML = `<div class="sf-loading">Building neighborhood map…</div>`;
+// Initialize map immediately — don't wait for data
+const map = L.map('choropleth-container', {
+  center: [47.608, -122.335],
+  zoom: 11,
+  zoomControl: true,
+  scrollWheelZoom: false,
+  attributionControl: true,
+});
 
-  // ── Load ramp data ─────────────────────────────────────────
-  let rows = [];
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+  maxZoom: 19,
+}).addTo(map);
+
+// Tooltip control
+const info = L.control({ position: 'topright' });
+info.onAdd = function () {
+  this._div = L.DomUtil.create('div', 'choropleth-tooltip');
+  this._div.innerHTML = '<span>Hover a neighborhood</span>';
+  return this._div;
+};
+info.update = function (name, stats) {
+  if (!name) { this._div.innerHTML = '<span>Hover a neighborhood</span>'; return; }
+  const pct   = stats ? Math.round((stats.good / stats.total) * 100) : null;
+  const total = stats ? stats.total.toLocaleString() : '—';
+  const good  = stats ? stats.good.toLocaleString() : '—';
+  this._div.innerHTML = `
+    <strong>${name}</strong><br>
+    ${pct !== null ? pct + '% good condition' : 'No data'}<br>
+    <span style="color:#6e6e73;font-size:0.75rem">${good} good of ${total} ramps</span>
+  `;
+};
+info.addTo(map);
+
+// Legend
+const legend = L.control({ position: 'bottomright' });
+legend.onAdd = function () {
+  const div = L.DomUtil.create('div', 'choropleth-legend');
+  div.innerHTML = `
+    <strong>% Good ramps</strong><br>
+    <span class="legend-dot" style="background:#34c759"></span>80–100%<br>
+    <span class="legend-dot" style="background:#7dce8f"></span>60–80%<br>
+    <span class="legend-dot" style="background:#ffd60a"></span>40–60%<br>
+    <span class="legend-dot" style="background:#ff9f0a"></span>20–40%<br>
+    <span class="legend-dot" style="background:#ff3b30"></span>0–20%<br>
+    <span class="legend-dot" style="background:#e0e0e5"></span>No data
+  `;
+  return div;
+};
+legend.addTo(map);
+
+// Force size recalculation after a short delay
+setTimeout(() => map.invalidateSize(), 200);
+setTimeout(() => map.invalidateSize(), 600);
+
+// Load data and paint neighborhoods
+async function paintMap() {
   try {
-    rows = await loadRampData();
-  } catch (e) {
-    container.innerHTML = `<div class="sf-error">Failed to load ramp data.</div>`;
-    return;
-  }
+    const [rows, geoRes] = await Promise.all([
+      loadRampData(),
+      fetch(CHOROPLETH_URL),
+    ]);
 
-  // ── Load neighborhood GeoJSON ──────────────────────────────
-  let geoJson = null;
-  try {
-    const res = await fetch(CHOROPLETH_GEOJSON_URL);
-    if (!res.ok) throw new Error(`GeoJSON fetch failed: ${res.status}`);
-    geoJson = await res.json();
-  } catch (e) {
-    container.innerHTML = `<div class="sf-error">Failed to load neighborhood boundaries.</div>`;
-    return;
-  }
+    const geoJson = await geoRes.json();
 
-  // ── Compute accessibility score per neighborhood ───────────
-  // Score = % of ramps rated Good
-  const hoodStats = {}; // { name: { good, total } }
-
-  for (const row of rows) {
-    const hood = (row.NEIGHBORHOOD || '').trim();
-    if (!hood || hood === 'Unknown') continue;
-
-    if (!hoodStats[hood]) hoodStats[hood] = { good: 0, total: 0 };
-    hoodStats[hood].total++;
-
-    const cond = (row.CONDITION || '').trim().toLowerCase();
-    if (cond === 'good' || cond === 'excellent') hoodStats[hood].good++;
-  }
-
-  // ── Set up Leaflet map ─────────────────────────────────────
-  container.innerHTML = '';
-
-  const map = L.map(container, {
-    center:        [47.608, -122.335],
-    zoom:          11,
-    zoomControl:   true,
-    scrollWheelZoom: false,   // don't hijack page scroll
-    attributionControl: true,
-  });
-
-  // Minimal light tile layer matching the site theme
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
-    maxZoom: 19,
-  }).addTo(map);
-
-  // ── Tooltip ────────────────────────────────────────────────
-  const info = L.control({ position: 'topright' });
-
-  info.onAdd = function () {
-    this._div = L.DomUtil.create('div', 'choropleth-tooltip');
-    this._div.innerHTML = '<span>Hover a neighborhood</span>';
-    return this._div;
-  };
-
-  info.update = function (name, stats) {
-    if (!name) {
-      this._div.innerHTML = '<span>Hover a neighborhood</span>';
-      return;
+    // Compute % good per neighborhood
+    const stats = {};
+    for (const row of rows) {
+      const hood = (row.NEIGHBORHOOD || '').trim();
+      if (!hood || hood === 'Unknown') continue;
+      if (!stats[hood]) stats[hood] = { good: 0, total: 0 };
+      stats[hood].total++;
+      const cond = (row.CONDITION || '').trim().toLowerCase();
+      if (cond === 'good' || cond === 'excellent') stats[hood].good++;
     }
-    const pct = stats
-      ? Math.round((stats.good / stats.total) * 100)
-      : null;
-    const total = stats ? stats.total.toLocaleString() : '—';
-    const good  = stats ? stats.good.toLocaleString()  : '—';
-    this._div.innerHTML = `
-      <strong>${name}</strong>
-      <br>${pct !== null ? pct + '% good condition' : 'No data'}
-      <br><span style="color:#6e6e73;font-size:0.75rem">${good} good of ${total} ramps</span>
-    `;
-  };
 
-  info.addTo(map);
+    // Add colored polygons
+    let geojsonLayer;
 
-  // ── GeoJSON layer ──────────────────────────────────────────
-  function getNeighborhoodName(props) {
-    return props.L_HOOD || props.S_HOOD || props.NEIGHBORHO || props.NAME || props.name || null;
+    geojsonLayer = L.geoJSON(geoJson, {
+      style: function (feature) {
+        const name = getHoodName(feature.properties);
+        const s    = name ? stats[name] : null;
+        const pct  = s ? (s.good / s.total) * 100 : null;
+        return {
+          fillColor:   accessibilityColor(pct),
+          fillOpacity: 0.75,
+          color:       '#ffffff',
+          weight:      1.5,
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        const name = getHoodName(feature.properties);
+        const s    = name ? stats[name] : null;
+        layer.on({
+          mouseover: function (e) {
+            e.target.setStyle({ weight: 3, fillOpacity: 0.92, color: '#1d1d1f' });
+            e.target.bringToFront();
+            info.update(name, s);
+          },
+          mouseout: function (e) {
+            geojsonLayer.resetStyle(e.target);
+            info.update(null, null);
+          },
+          click: function (e) {
+            map.fitBounds(e.target.getBounds(), { padding: [40, 40] });
+          },
+        });
+      },
+    }).addTo(map);
+
+    map.invalidateSize();
+    console.log('[point-map] ✓ Map painted with', Object.keys(stats).length, 'neighborhoods');
+
+  } catch (e) {
+    console.error('[point-map] Failed:', e);
   }
+}
 
-  L.geoJSON(geoJson, {
-    style: function (feature) {
-      const name  = getNeighborhoodName(feature.properties);
-      const stats = name ? hoodStats[name] : null;
-      const pct   = stats ? (stats.good / stats.total) * 100 : null;
-      return {
-        fillColor:   accessibilityColor(pct),
-        fillOpacity: 0.75,
-        color:       '#ffffff',
-        weight:      1.5,
-        opacity:     1,
-      };
-    },
-    onEachFeature: function (feature, layer) {
-      const name  = getNeighborhoodName(feature.properties);
-      const stats = name ? hoodStats[name] : null;
-
-      layer.on({
-        mouseover: function (e) {
-          const l = e.target;
-          l.setStyle({ weight: 3, fillOpacity: 0.92, color: '#1d1d1f' });
-          l.bringToFront();
-          info.update(name, stats);
-        },
-        mouseout: function (e) {
-          geojsonLayer.resetStyle(e.target);
-          info.update(null, null);
-        },
-        click: function (e) {
-          map.fitBounds(e.target.getBounds(), { padding: [40, 40] });
-        },
-      });
-    },
-  }).addTo(map);
-
-  // Keep reference for resetStyle
-  const geojsonLayer = L.geoJSON(geoJson, {
-    style: function (feature) {
-      const name  = getNeighborhoodName(feature.properties);
-      const stats = name ? hoodStats[name] : null;
-      const pct   = stats ? (stats.good / stats.total) * 100 : null;
-      return {
-        fillColor:   accessibilityColor(pct),
-        fillOpacity: 0.75,
-        color:       '#ffffff',
-        weight:      1.5,
-      };
-    },
-  }).addTo(map);
-
-  // Remove the duplicate first layer
-  map.eachLayer(l => {
-    if (l instanceof L.GeoJSON && l !== geojsonLayer) map.removeLayer(l);
-  });
-
-  // ── Legend ─────────────────────────────────────────────────
-  const legend = L.control({ position: 'bottomright' });
-
-  legend.onAdd = function () {
-    const div    = L.DomUtil.create('div', 'choropleth-legend');
-    const grades = [80, 60, 40, 20, 0];
-    const labels = ['80–100%', '60–80%', '40–60%', '20–40%', '0–20%'];
-    div.innerHTML = '<strong>% Good ramps</strong><br>';
-    grades.forEach((g, i) => {
-      div.innerHTML +=
-        `<span class="legend-dot" style="background:${accessibilityColor(g)}"></span>${labels[i]}<br>`;
-    });
-    div.innerHTML +=
-      `<span class="legend-dot" style="background:#e0e0e5"></span>No data`;
-    return div;
-  };
-
-  legend.addTo(map);
-
-  console.log('[choropleth] ✓ Map rendered');
-})();
+paintMap();
