@@ -13,7 +13,7 @@
     <a class="nav-brand" href="#">Broken Curbs</a>
     <div class="nav-meta">
       <span>INFO 474 · Group 3</span>
-      <span>Seattle, WA · 2026</span>
+      <span>Seattle, WA · 2025</span>
     </div>
   </nav>
 
@@ -22,8 +22,8 @@
     <div class="hero-tag">Accessibility · Infrastructure · Equity</div>
     <h1>Seattle's Streets Are <em>Failing</em><br>the People Who Need Them Most</h1>
     <p class="hero-sub">
-      We looked at over 46,000 curb ramps across Seattle, and what we found
-      was a city where your neighborhood decides whether you can even leave your block.
+      An analysis of 46,000+ curb ramps reveals a city unevenly maintained —
+      where your neighborhood determines whether you can get down the block.
     </p>
     <div class="hero-byline">
       <span>INFO 474 Group 3</span>
@@ -59,30 +59,28 @@
   <!-- ── Intro ─────────────────────────────────────────────── -->
   <div class="article-body fade-in">
     <p>
-      About 15% of Seattle residents live with some kind of disability. For many of them,
-      a curb ramp that's cracked, uneven, or too steep isn't just an annoyance. It can
-      make an entire block completely inaccessible, whether you use a wheelchair, have
-      a visual impairment, or are just trying to get around with a stroller.
+      For the 15% of Seattle residents living with a disability, a crumbling curb ramp
+      is not an inconvenience — it is a barrier. When a ramp is rated "poor" or "very poor,"
+      it can render entire blocks impassable for wheelchair users, people with visual
+      impairments, and parents with strollers.
     </p>
     <p>
-      Seattle's Department of Transportation keeps a record of every curb ramp in the city,
-      including its condition, when it was installed, and where it is. When we dug into
-      that data, we found something pretty striking. Maintenance is all over the place.
-      Some neighborhoods are full of newer, ADA-compliant ramps. Others are still relying
-      on ramps that were put in decades ago and have been deteriorating ever since.
+      The City of Seattle's Department of Transportation tracks every curb ramp in the city —
+      its condition, installation date, and location. What that data reveals is a patchwork
+      of maintenance: some neighborhoods dense with new, compliant ramps; others relying on
+      infrastructure decades past its useful life.
     </p>
     <p>
-      <strong>We explored the data from six different angles</strong> to understand the full
-      picture, starting with an overview of conditions citywide, then looking at how things
-      have changed over time, and finally zeroing in on which districts are dealing with
-      the most neglected infrastructure.
+      <strong>This investigation examines that data across six dimensions</strong> — from the
+      overall condition breakdown, to how maintenance has shifted over time, to which districts
+      bear the heaviest burden of deteriorating infrastructure.
     </p>
   </div>
 
   <hr class="divider"/>
 
   <!-- ══════════════════════════════════════════════════════
-       VIZ 1 — Bar chart
+       VIZ 1 — Bar chart (STATIC) · Student A
        ══════════════════════════════════════════════════════ -->
   <div class="section-header fade-in">
     <div class="section-label">01 — Static Visualization</div>
@@ -91,6 +89,7 @@
 
   <div class="viz-wrap fade-in">
     <div class="viz-meta">
+      <div class="legend" id="bar-chart-legend"></div>
       <span class="viz-type-badge">Static</span>
     </div>
     <div id="bar-chart-container">
@@ -112,8 +111,8 @@
 
   <hr class="divider"/>
 
- <!-- ══════════════════════════════════════════════════════
-       VIZ 2 — Timeline
+  <!-- ══════════════════════════════════════════════════════
+       VIZ 2 — Timeline (STATIC) · Student A
        ══════════════════════════════════════════════════════ -->
   <div class="section-header fade-in">
     <div class="section-label">02 — Static Visualization</div>
@@ -135,51 +134,44 @@
       to ADA mandates, infrastructure bonds, and neighborhood improvement projects.
       Ramps from the 1980s and 90s are now aging into "poor" ratings at an accelerating rate.
     </p>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- ══════════════════════════════════════════════════════
+       VIZ 3 — Choropleth
+       ══════════════════════════════════════════════════════ -->
+  <div class="section-header fade-in">
+    <div class="section-label">03 — Static Visualization</div>
+    <h2>A Geography of Neglect</h2>
+  </div>
+
+  <div class="viz-wrap fade-in">
+    <div class="viz-meta">
+      <span class="viz-type-badge">Static</span>
+    </div>
+    <div id="choropleth-container">
+      <div class="viz-placeholder">
+        <div class="viz-placeholder-icon">▦</div>
+        <div class="viz-placeholder-text">Choropleth coming soon</div>
+      </div>
+    </div>
+    <p class="viz-caption">Average ramp condition by Seattle neighborhood. Darker areas indicate higher concentrations of poor-rated ramps.</p>
+  </div>
+
+  <div class="article-body fade-in">
     <p>
-    Note: only ramps with a recorded installation date appear in this chart.
-    Many older ramps were never entered into the digital record, so earlier
-    decades are likely undercounted.
+      When mapped to neighborhoods, a clear pattern emerges.
+      <strong>South Seattle districts consistently show higher concentrations of deteriorating
+      ramps</strong> than wealthier northern neighborhoods — mirroring broader patterns of
+      infrastructure disinvestment in lower-income communities.
     </p>
   </div>
 
   <hr class="divider"/>
-  <!-- ══════════════════════════════════════════════════════
-     VIZ 3 — Point Map
-     ══════════════════════════════════════════════════════ -->
-<div class="section-header fade-in">
-  <div class="section-label">03 — Static Visualization</div>
-  <h2>A Geography of Neglect</h2>
-</div>
-
-<div class="viz-wrap fade-in">
-  <div class="viz-meta">
-    <span class="viz-type-badge">Static</span>
-  </div>
-
-  <div id="choropleth-container">
-    <div id="audrey-container"></div>
-  </div>
-
-  <p class="viz-caption">
-    Sampled curb ramp locations across Seattle. Hover points to view basic details
-    (condition, district, install date). This is an initial map view while the
-    choropleth layer is in progress.
-  </p>
-</div>
-
-<div class="article-body fade-in">
-  <p>
-    When mapped to neighborhoods, a clear pattern emerges.
-    <strong>South Seattle districts consistently show higher concentrations of deteriorating
-    ramps</strong> than wealthier northern neighborhoods — mirroring broader patterns of
-    infrastructure disinvestment in lower-income communities.
-  </p>
-</div>
-
-<hr class="divider"/>
 
   <!-- ══════════════════════════════════════════════════════
-       VIZ 4 — Drill-down
+       VIZ 4 — Drill-down (INTERACTIVE) · Student B
        ══════════════════════════════════════════════════════ -->
   <div class="section-header fade-in">
     <div class="section-label">04 — Interactive</div>
@@ -190,14 +182,19 @@
     <div class="viz-meta">
       <span class="viz-type-badge interactive">Interactive</span>
     </div>
-    <div id="drilldown-container"></div>
+    <div id="drilldown-container">
+      <div class="viz-placeholder">
+        <div class="viz-placeholder-icon">◉</div>
+        <div class="viz-placeholder-text">Drill-down coming soon</div>
+      </div>
+    </div>
     <p class="viz-caption">Click any condition bar to drill down and see how it's distributed across Seattle's city council districts.</p>
   </div>
 
   <hr class="divider"/>
 
   <!-- ══════════════════════════════════════════════════════
-       VIZ 5 — Filterable bar
+       VIZ 5 — Filterable bar (INTERACTIVE) · Student C
        ══════════════════════════════════════════════════════ -->
   <div class="section-header fade-in">
     <div class="section-label">05 — Interactive</div>
@@ -209,6 +206,10 @@
       <span class="viz-type-badge interactive">Interactive</span>
     </div>
     <div id="filterable-bar-container">
+      <div class="viz-placeholder">
+        <div class="viz-placeholder-icon">⊡</div>
+        <div class="viz-placeholder-text">Filterable bar coming soon</div>
+      </div>
     </div>
     <p class="viz-caption">Drag the year slider to filter ramps by installation date and watch the condition distribution shift.</p>
   </div>
@@ -222,46 +223,29 @@
   </div>
 
   <hr class="divider"/>
-<!-- ══════════════════════════════════════════════════════
-     VIZ 6 — Search & Filter
-     ══════════════════════════════════════════════════════ -->
-<div class="section-header fade-in">
-  <div class="section-label">06 — Interactive</div>
-  <h2>Explore the Data</h2>
-</div>
 
-<div class="viz-wrap fade-in">
-  <div class="viz-meta">
-    <span class="viz-type-badge interactive">Interactive</span>
+  <!-- ══════════════════════════════════════════════════════
+       VIZ 6 — Search & filter
+       ══════════════════════════════════════════════════════ -->
+  <div class="section-header fade-in">
+    <div class="section-label">06 — Interactive</div>
+    <h2>Explore the Data</h2>
   </div>
 
-  <div id="search-filter-container" class="search-filter-block">
-    <div class="search-filter-controls">
-      <label class="sf-label">
-        Condition
-        <select id="sf-condition" class="sf-select"></select>
-      </label>
-
-      <label class="sf-label">
-        District
-        <select id="sf-district" class="sf-select"></select>
-      </label>
-
-      <label class="sf-label">
-        Min install year
-        <input id="sf-minyear" class="sf-input" type="number" placeholder="e.g., 1995" min="1900" max="2100"/>
-      </label>
-
-      <div class="sf-count" id="sf-count">—</div>
+  <div class="viz-wrap fade-in">
+    <div class="viz-meta">
+      <span class="viz-type-badge interactive">Interactive</span>
     </div>
-
-    <div id="search-filter-viz"></div>
+    <div class="sf-controls">
+      <select id="sf-condition"><option>All</option></select>
+      <select id="sf-neighborhood"><option>All</option></select>
+      <input id="sf-minyear" type="number" placeholder="Min year e.g. 2010"/>
+      <span id="sf-count"></span>
+    </div>
+    <div id="search-filter-container">
+    </div>
+    <p class="viz-caption">Filter by condition, neighborhood, and installation year to explore specific ramps across the city.</p>
   </div>
-
-  <p class="viz-caption">
-    Use the filters to explore curb ramps by condition, district, and installation year. Results are drawn from the full dataset.
-  </p>
-</div>
 
   <!-- ── Conclusion ─────────────────────────────────────────── -->
   <div class="article-body fade-in">
@@ -317,11 +301,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
   <script src="shared/dataLoader.js"></script>
   <script src="sketches/bar-chart.js"></script>
+  <!-- Uncomment as teammates finish their sketches: -->
   <script src="sketches/timeline.js"></script>
-  <script src="sketches/point-map.js"></script>
-  <script src="sketches/filterable-bar.js"></script>
+  <!-- <script src="sketches/choropleth.js"></script> -->
+  <!-- <script src="sketches/drilldown.js"></script> -->
+  <!-- <script src="sketches/filterable-bar.js"></script> -->
   <script src="sketches/search-filter.js"></script>
-  <script src="sketches/drilldown.js"></script>
 
   <script>
     // ── Scroll fade-in ─────────────────────────────────────

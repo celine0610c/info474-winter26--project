@@ -339,86 +339,6 @@ body {
   color: var(--text-tertiary);
   line-height: 1.5;
 }
-/* ── VIZ 6 Controls (Search & Filter) ─────────────────────── */
-.search-filter-block {
-  padding: 16px;
-}
-
-.search-filter-controls{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 14px;
-  align-items: flex-end;
-  margin-bottom: 12px;
-}
-
-.sf-label{
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: 0.02em;
-}
-
-.sf-select, .sf-input{
-  height: 38px;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 0.85rem;
-  min-width: 160px;
-  outline: none;
-}
-
-.sf-select:focus, .sf-input:focus{
-  border-color: rgba(0,113,227,0.45);
-  box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
-}
-
-.sf-count{
-  margin-left: auto;
-  font-size: 0.78rem;
-  color: var(--text-tertiary);
-  padding-bottom: 6px;
-}
-
-/* Make the p5 canvas feel like other cards */
-#search-filter-viz canvas{
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-}
-/* ── VIZ 6 Blue theme overrides (match site accent) ───────── */
-.search-filter-block{
-  border-color: rgba(0,113,227,0.18);
-}
-
-.sf-select, .sf-input{
-  border-color: rgba(0,113,227,0.20);
-  background: #fff;
-}
-
-.sf-select:focus, .sf-input:focus{
-  border-color: rgba(0,113,227,0.55);
-  box-shadow: 0 0 0 3px rgba(0,113,227,0.18);
-}
-
-.sf-count{
-  color: rgba(0,113,227,0.70);
-}
-
-/* Canvas container border + inner lines look bluer */
-#search-filter-viz canvas{
-  border-color: rgba(0,113,227,0.18);
-}
-
-/* Optional: make dropdown arrow + selection feel more "accent" */
-.sf-select{
-  accent-color: var(--accent);
-}
 
 /* ── Legend ───────────────────────────────────────────────── */
 .legend {
@@ -559,4 +479,42 @@ body {
   .stat-item              { border-right: none; padding: 0; text-align: left; }
   .hero h1                { font-size: 2.2rem; }
   .site-footer            { padding: 24px 20px; flex-direction: column; gap: 8px; }
+}
+
+/* ── Search filter controls ───────────────────────────────── */
+.sf-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.sf-controls select,
+.sf-controls input {
+  font-family: -apple-system, 'Helvetica Neue', sans-serif;
+  font-size: 0.82rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  outline: none;
+  cursor: pointer;
+  appearance: auto;
+}
+
+.sf-controls select:focus,
+.sf-controls input:focus {
+  border-color: var(--accent);
+}
+
+.sf-controls input {
+  width: 160px;
+}
+
+#sf-count {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-left: auto;
 }
