@@ -1,237 +1,195 @@
-const pointMapSketch = (p) => {
-  const PAD = 18;
+// ============================================================
+//  choropleth.js
+//  Static choropleth map — ramp accessibility by neighborhood
+//
+//  Metric: % of ramps rated Good in each neighborhood
+//    Green  = high % good  (accessible)
+//    Red    = low % good   (needs attention)
+//
+//  Uses Leaflet.js for the map, loaded via CDN in index.html.
+//  Neighborhood polygons come from the same GeoJSON already
+//  fetched by dataLoader.js.
+//
+//  DEPENDS ON: shared/dataLoader.js
+// ============================================================
 
-  let W, H;
-  let pts = [];
-  let status = "Loading…";
-  let dataReady = false;
-  let errorMsg = null;
+const CHOROPLETH_GEOJSON_URL =
+  'https://data-seattlecitygis.opendata.arcgis.com/api/download/v1/items/b4a142f592e94d39a3bf787f3c112c1d/geojson?layers=0';
 
-  let hoveredIndex = -1;
+// Color scale: red → amber → green based on % good
+function accessibilityColor(pct) {
+  if (pct === null) return '#e0e0e5';   // no data — light gray
+  if (pct >= 80)   return '#34c759';    // great
+  if (pct >= 60)   return '#7dce8f';    // good
+  if (pct >= 40)   return '#ffd60a';    // moderate
+  if (pct >= 20)   return '#ff9f0a';    // poor
+  return '#ff3b30';                      // very poor
+}
 
-  p.setup = function () {
-    W = p.min(p.windowWidth - 100, 920);
-    H = 520;
+(async function () {
+  const container = document.getElementById('choropleth-container');
+  if (!container) return;
 
-    const cnv = p.createCanvas(W, H);
-    cnv.parent("audrey-container");
+  container.innerHTML = `<div class="sf-loading">Building neighborhood map…</div>`;
 
-    p.textFont('-apple-system, "Helvetica Neue", sans-serif');
-    p.noLoop();
+  // ── Load ramp data ─────────────────────────────────────────
+  let rows = [];
+  try {
+    rows = await loadRampData();
+  } catch (e) {
+    container.innerHTML = `<div class="sf-error">Failed to load ramp data.</div>`;
+    return;
+  }
 
-    loadData();
+  // ── Load neighborhood GeoJSON ──────────────────────────────
+  let geoJson = null;
+  try {
+    const res = await fetch(CHOROPLETH_GEOJSON_URL);
+    if (!res.ok) throw new Error(`GeoJSON fetch failed: ${res.status}`);
+    geoJson = await res.json();
+  } catch (e) {
+    container.innerHTML = `<div class="sf-error">Failed to load neighborhood boundaries.</div>`;
+    return;
+  }
+
+  // ── Compute accessibility score per neighborhood ───────────
+  // Score = % of ramps rated Good
+  const hoodStats = {}; // { name: { good, total } }
+
+  for (const row of rows) {
+    const hood = (row.NEIGHBORHOOD || '').trim();
+    if (!hood || hood === 'Unknown') continue;
+
+    if (!hoodStats[hood]) hoodStats[hood] = { good: 0, total: 0 };
+    hoodStats[hood].total++;
+
+    const cond = (row.CONDITION || '').trim().toLowerCase();
+    if (cond === 'good' || cond === 'excellent') hoodStats[hood].good++;
+  }
+
+  // ── Set up Leaflet map ─────────────────────────────────────
+  container.innerHTML = '';
+
+  const map = L.map(container, {
+    center:        [47.608, -122.335],
+    zoom:          11,
+    zoomControl:   true,
+    scrollWheelZoom: false,   // don't hijack page scroll
+    attributionControl: true,
+  });
+
+  // Minimal light tile layer matching the site theme
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // ── Tooltip ────────────────────────────────────────────────
+  const info = L.control({ position: 'topright' });
+
+  info.onAdd = function () {
+    this._div = L.DomUtil.create('div', 'choropleth-tooltip');
+    this._div.innerHTML = '<span>Hover a neighborhood</span>';
+    return this._div;
   };
 
-  p.draw = function () {
-    p.background(250);
-
-    if (errorMsg) {
-      drawError(errorMsg);
+  info.update = function (name, stats) {
+    if (!name) {
+      this._div.innerHTML = '<span>Hover a neighborhood</span>';
       return;
     }
-    if (!dataReady) {
-      drawSpinner();
-      return;
-    }
-
-    drawHeader();
-    drawPoints();
-    drawHover();
+    const pct = stats
+      ? Math.round((stats.good / stats.total) * 100)
+      : null;
+    const total = stats ? stats.total.toLocaleString() : '—';
+    const good  = stats ? stats.good.toLocaleString()  : '—';
+    this._div.innerHTML = `
+      <strong>${name}</strong>
+      <br>${pct !== null ? pct + '% good condition' : 'No data'}
+      <br><span style="color:#6e6e73;font-size:0.75rem">${good} good of ${total} ramps</span>
+    `;
   };
 
-  p.mouseMoved = function () {
-    if (!dataReady) return;
-    updateHoverIndex();
-    p.redraw();
+  info.addTo(map);
+
+  // ── GeoJSON layer ──────────────────────────────────────────
+  function getNeighborhoodName(props) {
+    return props.L_HOOD || props.S_HOOD || props.NEIGHBORHO || props.NAME || props.name || null;
+  }
+
+  L.geoJSON(geoJson, {
+    style: function (feature) {
+      const name  = getNeighborhoodName(feature.properties);
+      const stats = name ? hoodStats[name] : null;
+      const pct   = stats ? (stats.good / stats.total) * 100 : null;
+      return {
+        fillColor:   accessibilityColor(pct),
+        fillOpacity: 0.75,
+        color:       '#ffffff',
+        weight:      1.5,
+        opacity:     1,
+      };
+    },
+    onEachFeature: function (feature, layer) {
+      const name  = getNeighborhoodName(feature.properties);
+      const stats = name ? hoodStats[name] : null;
+
+      layer.on({
+        mouseover: function (e) {
+          const l = e.target;
+          l.setStyle({ weight: 3, fillOpacity: 0.92, color: '#1d1d1f' });
+          l.bringToFront();
+          info.update(name, stats);
+        },
+        mouseout: function (e) {
+          geojsonLayer.resetStyle(e.target);
+          info.update(null, null);
+        },
+        click: function (e) {
+          map.fitBounds(e.target.getBounds(), { padding: [40, 40] });
+        },
+      });
+    },
+  }).addTo(map);
+
+  // Keep reference for resetStyle
+  const geojsonLayer = L.geoJSON(geoJson, {
+    style: function (feature) {
+      const name  = getNeighborhoodName(feature.properties);
+      const stats = name ? hoodStats[name] : null;
+      const pct   = stats ? (stats.good / stats.total) * 100 : null;
+      return {
+        fillColor:   accessibilityColor(pct),
+        fillOpacity: 0.75,
+        color:       '#ffffff',
+        weight:      1.5,
+      };
+    },
+  }).addTo(map);
+
+  // Remove the duplicate first layer
+  map.eachLayer(l => {
+    if (l instanceof L.GeoJSON && l !== geojsonLayer) map.removeLayer(l);
+  });
+
+  // ── Legend ─────────────────────────────────────────────────
+  const legend = L.control({ position: 'bottomright' });
+
+  legend.onAdd = function () {
+    const div    = L.DomUtil.create('div', 'choropleth-legend');
+    const grades = [80, 60, 40, 20, 0];
+    const labels = ['80–100%', '60–80%', '40–60%', '20–40%', '0–20%'];
+    div.innerHTML = '<strong>% Good ramps</strong><br>';
+    grades.forEach((g, i) => {
+      div.innerHTML +=
+        `<span class="legend-dot" style="background:${accessibilityColor(g)}"></span>${labels[i]}<br>`;
+    });
+    div.innerHTML +=
+      `<span class="legend-dot" style="background:#e0e0e5"></span>No data`;
+    return div;
   };
 
-  p.windowResized = function () {
-    W = p.min(p.windowWidth - 100, 920);
-    p.resizeCanvas(W, H);
-    if (dataReady) p.redraw();
-  };
+  legend.addTo(map);
 
-  async function loadData() {
-    try {
-      if (typeof loadRampData !== "function") {
-        errorMsg = "loadRampData() not found. Check script order (p5.js → shared/dataLoader.js → point-map.js).";
-        p.redraw();
-        return;
-      }
-
-      const rows = await loadRampData();
-      if (!rows || rows.length === 0) {
-        errorMsg = "No rows loaded.";
-        p.redraw();
-        return;
-      }
-
-      const LAT_KEYS = ["Y", "LAT", "LATITUDE", "latitude", "y", "Y_COORD", "YCOORD"];
-      const LON_KEYS = ["X", "LON", "LONGITUDE", "longitude", "x", "X_COORD", "XCOORD"];
-
-      const latKey = LAT_KEYS.find((k) => rows[0] && rows[0][k] != null);
-      const lonKey = LON_KEYS.find((k) => rows[0] && rows[0][k] != null);
-
-      if (!latKey || !lonKey) {
-        errorMsg = "Lat/Lon columns not found in CSV. Update LAT_KEYS/LON_KEYS in point-map.js.";
-        p.redraw();
-        return;
-      }
-
-      const N = p.min(2500, rows.length);
-      const step = p.max(1, Math.floor(rows.length / N));
-      const sampled = [];
-      for (let i = 0; i < rows.length; i += step) sampled.push(rows[i]);
-
-      let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
-
-      for (const r of sampled) {
-        const lat = parseFloat(r[latKey]);
-        const lon = parseFloat(r[lonKey]);
-        if (!isFinite(lat) || !isFinite(lon)) continue;
-        minLat = Math.min(minLat, lat);
-        maxLat = Math.max(maxLat, lat);
-        minLon = Math.min(minLon, lon);
-        maxLon = Math.max(maxLon, lon);
-      }
-
-      pts = sampled
-        .map((r) => {
-          const lat = parseFloat(r[latKey]);
-          const lon = parseFloat(r[lonKey]);
-          if (!isFinite(lat) || !isFinite(lon)) return null;
-
-          const x = mapVal(lon, minLon, maxLon, PAD, W - PAD);
-          const y = mapVal(lat, maxLat, minLat, PAD + 40, H - PAD);
-
-          return {
-            x,
-            y,
-            condition: (r["CONDITION"] || "Unknown").toString(),
-            install: (r["INSTALL_DATE"] || "").toString(),
-            district: (r["PRIMARYDISTRICTCD"] || r["DISTRICT"] || "").toString(),
-          };
-        })
-        .filter(Boolean);
-
-      status = `Loaded ${rows.length.toLocaleString()} · showing ${pts.length.toLocaleString()} sampled points`;
-      dataReady = true;
-      updateHoverIndex();
-      p.redraw();
-    } catch (e) {
-      console.error("[point-map]", e);
-      errorMsg = "Failed to load data.";
-      p.redraw();
-    }
-  }
-
-  function drawHeader() {
-    p.noStroke();
-    p.fill(20);
-    p.textSize(14);
-    p.text("Point Map (sampled) — Seattle Curb Ramps", 12, 20);
-
-    p.fill(120);
-    p.textSize(12);
-    p.text(status, 12, 38);
-  }
-
-  function drawPoints() {
-    p.noStroke();
-    for (let i = 0; i < pts.length; i++) {
-      const pt = pts[i];
-      const c = pt.condition.toLowerCase();
-      let a = 120;
-      if (c.includes("poor")) a = 200;
-      if (c.includes("very")) a = 230;
-
-      p.fill(60, 120, 200, a);
-      p.circle(pt.x, pt.y, 4);
-    }
-  }
-
-  function updateHoverIndex() {
-    hoveredIndex = -1;
-    if (!pts.length) return;
-
-    let bestI = -1;
-    let bestD2 = Infinity;
-    for (let i = 0; i < pts.length; i++) {
-      const dx = p.mouseX - pts[i].x;
-      const dy = p.mouseY - pts[i].y;
-      const d2 = dx * dx + dy * dy;
-      if (d2 < bestD2) {
-        bestD2 = d2;
-        bestI = i;
-      }
-    }
-    if (bestD2 < 64) hoveredIndex = bestI;
-  }
-
-  function drawHover() {
-    if (hoveredIndex < 0) return;
-
-    const pt = pts[hoveredIndex];
-
-    p.stroke(20);
-    p.noFill();
-    p.circle(pt.x, pt.y, 10);
-
-    const lines = [
-      `Condition: ${pt.condition}`,
-      pt.district ? `District: ${pt.district}` : null,
-      pt.install ? `Install: ${pt.install}` : null,
-    ].filter(Boolean);
-
-    const boxW = 340;
-    const boxH = 18 + lines.length * 16;
-
-    const bx = Math.min(pt.x + 12, W - boxW - 10);
-    const by = Math.max(pt.y - boxH - 10, 55);
-
-    p.noStroke();
-    p.fill(255);
-    p.rect(bx, by, boxW, boxH, 8);
-
-    p.fill(20);
-    p.textSize(12);
-    let ty = by + 18;
-    for (const line of lines) {
-      p.text(line, bx + 12, ty);
-      ty += 16;
-    }
-  }
-
-  function drawSpinner() {
-    p.background(250);
-    p.noFill();
-    p.stroke(170);
-    p.strokeWeight(1.5);
-    const angle = (p.frameCount * 0.06) % p.TWO_PI;
-    p.arc(W / 2, H / 2, 28, 28, angle, angle + p.PI * 1.4);
-
-    p.noStroke();
-    p.fill(150);
-    p.textSize(11);
-    p.textAlign(p.CENTER);
-    p.text("Loading…", W / 2, H / 2 + 26);
-    p.textAlign(p.LEFT);
-  }
-
-  function drawError(msg) {
-    p.background(250);
-    p.noStroke();
-    p.fill("#ff3b30");
-    p.textSize(13);
-    p.textAlign(p.CENTER, p.CENTER);
-    p.text(msg, W / 2, H / 2);
-    p.textAlign(p.LEFT, p.BASELINE);
-  }
-
-  function mapVal(v, a, b, c, d) {
-    if (a === b) return (c + d) / 2;
-    return c + ((v - a) * (d - c)) / (b - a);
-  }
-};
-
-new p5(pointMapSketch);
+  console.log('[choropleth] ✓ Map rendered');
+})();

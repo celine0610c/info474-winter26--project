@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Broken Curbs — Seattle's Accessibility Crisis</title>
   <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
 <body>
 
@@ -80,17 +81,16 @@
   <hr class="divider"/>
 
   <!-- ══════════════════════════════════════════════════════
-       VIZ 1 — Bar chart (STATIC) · Student A
+       VIZ 1 — Bar chart
        ══════════════════════════════════════════════════════ -->
   <div class="section-header fade-in">
-    <div class="section-label">01 — Static Visualization</div>
+    <div class="section-label">01. </div>
     <h2>The Condition Breakdown</h2>
   </div>
 
   <div class="viz-wrap fade-in">
     <div class="viz-meta">
       <div class="legend" id="bar-chart-legend"></div>
-      <span class="viz-type-badge">Static</span>
     </div>
     <div id="bar-chart-container">
     </div>
@@ -112,17 +112,14 @@
   <hr class="divider"/>
 
   <!-- ══════════════════════════════════════════════════════
-       VIZ 2 — Timeline (STATIC) · Student A
+       VIZ 2 — Timeline
        ══════════════════════════════════════════════════════ -->
   <div class="section-header fade-in">
-    <div class="section-label">02 — Static Visualization</div>
+    <div class="section-label">02. </div>
     <h2>A City Built in Waves</h2>
   </div>
 
   <div class="viz-wrap fade-in">
-    <div class="viz-meta">
-      <span class="viz-type-badge">Static</span>
-    </div>
     <div id="timeline-container">
     </div>
     <p class="viz-caption">Curb ramp installations per year — showing how ADA legislation and city budget cycles shaped the network over time.</p>
@@ -139,22 +136,15 @@
   <hr class="divider"/>
 
   <!-- ══════════════════════════════════════════════════════
-       VIZ 3 — Choropleth
+       VIZ 3 — Choropleth (STATIC) · Student B
        ══════════════════════════════════════════════════════ -->
-  <div class="section-header fade-in">
-    <div class="section-label">03 — Static Visualization</div>
+<div class="section-header fade-in">
+    <div class="section-label">03. </div>
     <h2>A Geography of Neglect</h2>
   </div>
 
   <div class="viz-wrap fade-in">
-    <div class="viz-meta">
-      <span class="viz-type-badge">Static</span>
-    </div>
     <div id="choropleth-container">
-      <div class="viz-placeholder">
-        <div class="viz-placeholder-icon">▦</div>
-        <div class="viz-placeholder-text">Choropleth coming soon</div>
-      </div>
     </div>
     <p class="viz-caption">Average ramp condition by Seattle neighborhood. Darker areas indicate higher concentrations of poor-rated ramps.</p>
   </div>
@@ -171,17 +161,14 @@
   <hr class="divider"/>
 
   <!-- ══════════════════════════════════════════════════════
-       VIZ 4 — Drill-down (INTERACTIVE) · Student B
+       VIZ 4 — Drill-down
        ══════════════════════════════════════════════════════ -->
   <div class="section-header fade-in">
-    <div class="section-label">04 — Interactive</div>
+    <div class="section-label">04. </div>
     <h2>Condition by District</h2>
   </div>
 
   <div class="viz-wrap fade-in">
-    <div class="viz-meta">
-      <span class="viz-type-badge interactive">Interactive</span>
-    </div>
     <div id="drilldown-container">
       <div class="viz-placeholder">
         <div class="viz-placeholder-icon">◉</div>
@@ -194,17 +181,14 @@
   <hr class="divider"/>
 
   <!-- ══════════════════════════════════════════════════════
-       VIZ 5 — Filterable bar (INTERACTIVE) · Student C
+       VIZ 5 — Filterable bar
        ══════════════════════════════════════════════════════ -->
   <div class="section-header fade-in">
-    <div class="section-label">05 — Interactive</div>
+    <div class="section-label">05. </div>
     <h2>How Condition Has Shifted Over Time</h2>
   </div>
 
   <div class="viz-wrap fade-in">
-    <div class="viz-meta">
-      <span class="viz-type-badge interactive">Interactive</span>
-    </div>
     <div id="filterable-bar-container">
       <div class="viz-placeholder">
         <div class="viz-placeholder-icon">⊡</div>
@@ -228,14 +212,11 @@
        VIZ 6 — Search & filter
        ══════════════════════════════════════════════════════ -->
   <div class="section-header fade-in">
-    <div class="section-label">06 — Interactive</div>
+    <div class="section-label">06. </div>
     <h2>Explore the Data</h2>
   </div>
 
   <div class="viz-wrap fade-in">
-    <div class="viz-meta">
-      <span class="viz-type-badge interactive">Interactive</span>
-    </div>
     <div class="sf-controls">
       <select id="sf-condition"><option>All</option></select>
       <select id="sf-neighborhood"><option>All</option></select>
@@ -243,6 +224,10 @@
       <span id="sf-count"></span>
     </div>
     <div id="search-filter-container">
+      <div class="viz-placeholder">
+        <div class="viz-placeholder-icon">⌕</div>
+        <div class="viz-placeholder-text">Loading…</div>
+      </div>
     </div>
     <p class="viz-caption">Filter by condition, neighborhood, and installation year to explore specific ramps across the city.</p>
   </div>
@@ -298,12 +283,13 @@
   <div id="search-filter-tooltip"  class="viz-tooltip"></div>
 
   <!-- ── Scripts ───────────────────────────────────────────── -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
   <script src="shared/dataLoader.js"></script>
   <script src="sketches/bar-chart.js"></script>
   <!-- Uncomment as teammates finish their sketches: -->
   <script src="sketches/timeline.js"></script>
-  <!-- <script src="sketches/choropleth.js"></script> -->
+  <script src="sketches/choropleth.js"></script>
   <!-- <script src="sketches/drilldown.js"></script> -->
   <!-- <script src="sketches/filterable-bar.js"></script> -->
   <script src="sketches/search-filter.js"></script>
