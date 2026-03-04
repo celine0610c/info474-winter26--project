@@ -518,3 +518,87 @@ body {
   color: var(--text-secondary);
   margin-left: auto;
 }
+
+/* ── Search filter table ──────────────────────────────────── */
+#search-filter-container {
+  min-height: 420px;
+  height: 420px;        /* fixed height so it doesn't grow forever */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sf-table-wrap {
+  overflow-y: auto;     /* scrollable */
+  flex: 1;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.sf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.sf-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  z-index: 1;
+}
+
+.sf-table tbody tr:nth-child(even) {
+  background: var(--bg);
+}
+
+.sf-table tbody tr:hover {
+  background: var(--accent-light);
+}
+
+.sf-table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.sf-empty {
+  text-align: center;
+  color: var(--text-tertiary);
+  padding: 40px !important;
+}
+
+.sf-loading,
+.sf-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 420px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.sf-error { color: var(--red); }
+
+/* Condition badges */
+.sf-cond-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.sf-cond-good             { background: #e6f9ed; color: #1a7a3a; }
+.sf-cond-fair             { background: #fff4e0; color: #a06000; }
+.sf-cond-poor             { background: #fff0eb; color: #b94000; }
+.sf-cond-very-poor        { background: #ffeeee; color: #c0392b; }
+.sf-cond-new-construction { background: #e8f1fb; color: #0051a8; }
+.sf-cond-unknown          { background: #f5f5f7; color: #6e6e73; }
