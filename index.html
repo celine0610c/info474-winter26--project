@@ -182,28 +182,26 @@
   <hr class="divider"/>
 
   <!-- ══════════════════════════════════════════════════════
-       VIZ 5 — Filterable bar
+       VIZ 5 — Scatter plot
        ══════════════════════════════════════════════════════ -->
   <div class="section-header fade-in">
     <div class="section-label">05. </div>
-    <h2>How Condition Has Shifted Over Time</h2>
+    <h2>Age vs. Condition: The Neighborhoods Falling Behind</h2>
   </div>
 
   <div class="viz-wrap fade-in">
     <div id="filterable-bar-container">
-      <div class="viz-placeholder">
-        <div class="viz-placeholder-icon">⊡</div>
-        <div class="viz-placeholder-text">Filterable bar coming soon</div>
-      </div>
     </div>
-    <p class="viz-caption">Drag the year slider to filter ramps by installation date and watch the condition distribution shift.</p>
+    <p class="viz-caption">Each dot is a neighborhood. X axis is average ramp age, Y axis is % of ramps in poor or fair condition. Dot size reflects total number of ramps. Hover a dot to identify the neighborhood.</p>
   </div>
 
   <div class="article-body fade-in">
     <p>
-      Filtering by decade makes the aging problem undeniable. Ramps installed before 1995
-      show dramatically higher rates of poor and very poor ratings. Seattle's oldest ramps —
-      many built only to meet the bare minimum of the 1990 ADA — are now failing at scale.
+      The trend line tells a clear story — older ramps are more likely to be in poor condition.
+      But the outliers are just as revealing. Some neighborhoods with relatively new ramps
+      still have high failure rates, suggesting maintenance gaps that go beyond age alone.
+      Others have old infrastructure that has been kept in good shape — pointing to where
+      investment has actually happened.
     </p>
   </div>
 
@@ -291,7 +289,7 @@
   <script src="sketches/timeline.js"></script>
   <script src="sketches/point-map.js"></script>
   <script src="sketches/drilldown.js"></script>
-  <!-- <script src="sketches/filterable-bar.js"></script> -->
+  <script src="sketches/filterable-bar.js"></script>
   <script src="sketches/search-filter.js"></script>
 
   <script>
